@@ -3,22 +3,49 @@ import tensorflow as tf
 import numpy as np
 import cv2
 from PIL import Image
-# นำเข้าไฟล์ตกแต่งที่เราแยกไว้
-import style 
+import style  # อย่าลืมอัปโหลด style.py ขึ้น GitHub ด้วยนะคะ
 
-# --- ส่วนของการตั้งค่าหน้าเว็บ ---
-st.set_page_config(page_title="Emotion AI", page_icon="😊")
-style.apply_custom_style() # เรียกใช้ฟังก์ชันตกแต่ง
-style.setup_sidebar()      # เรียกใช้ Sidebar
+# ตกแต่งหน้าเว็บ
+st.set_page_config(page_title="Emotion AI Detector", page_icon="😊")
+style.apply_custom_style()
+style.setup_sidebar()
 
-# โหลดโมเดลและอื่นๆ (โค้ดเดิมของคุณ)
+# โหลดโมเดล
 @st.cache_resource
 def load_model():
-    return tf.keras.models.load_model("best_emotion_model.h5")
+    return tf.keras.models.load_model("final_emotion_model.h5")
 
 model = load_model()
 class_names = ['angry', 'happy', 'neutral', 'sad']
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
 st.title("😊 Emotion AI Detector")
-# ... (ส่วนที่เหลือของโค้ดทำนายผล ให้ใช้เหมือนเดิมได้เลยค่ะ) ...
+st.success("✅ ระบบ AI พร้อมทำงานแล้ว! อัปโหลดรูปภาพเพื่อเริ่มต้นใช้งาน")
+
+uploaded_file = st.file_uploader("เลือกรูปภาพ...", type=["jpg", "jpeg", "png"])
+
+if uploaded_file is not None:
+    image = Image.open(uploaded_file)
+    st.image(image, caption='รูปภาพของคุณ', use_container_width=True)
+    
+    with st.spinner('กำลังวิเคราะห์อารมณ์...'):
+        img_array = np.array(image.convert('RGB'))
+        gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+        faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+
+        if len(faces) > 0:
+            (x, y, w, h) = faces[0]
+            roi = img_array[max(0, y - int(h*0.2)):y+h, x:x+w]
+            roi_resized = cv2.resize(roi, (224, 224))
+            
+            img_input = tf.keras.applications.mobilenet_v2.preprocess_input(np.expand_dims(roi_resized, axis=0))
+            preds = model.predict(img_input)
+            
+            result = class_names[np.argmax(preds)]
+            confidence = np.max(preds)
+            
+            st.markdown(f"### 🎯 ผลลัพธ์: {result.upper()}")
+            st.progress(float(confidence))
+            st.write(f"✨ ความมั่นใจ: {confidence * 100:.2f}%")
+        else:
+            st.error("❌ ไม่พบใบหน้าในรูปภาพ ลองเปลี่ยนรูปที่ชัดเจนขึ้นนะคะ")
