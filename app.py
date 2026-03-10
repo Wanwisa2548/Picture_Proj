@@ -3,7 +3,15 @@ import tensorflow as tf
 import numpy as np
 import cv2
 from PIL import Image
-import style  # อย่าลืมอัปโหลด style.py ขึ้น GitHub ด้วยนะคะ
+import style 
+import subprocess
+import sys
+
+try:
+    import tensorflow as tf
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "tensorflow==2.16.1"])
+    import tensorflow as tf
 
 # ตกแต่งหน้าเว็บ
 st.set_page_config(page_title="Emotion AI Detector", page_icon="😊")
@@ -49,3 +57,4 @@ if uploaded_file is not None:
             st.write(f"✨ ความมั่นใจ: {confidence * 100:.2f}%")
         else:
             st.error("❌ ไม่พบใบหน้าในรูปภาพ ลองเปลี่ยนรูปที่ชัดเจนขึ้นนะคะ")
+
