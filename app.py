@@ -1,10 +1,16 @@
 import streamlit as st
+import tensorflow as tf
+import numpy as np
 import cv2
 from PIL import Image
-import numpy as np
 import style
 
-# ตั้งค่าหน้าเว็บ
+# โหลดโมเดล .h5 ได้โดยตรง
+@st.cache_resource
+def load_model():
+    return tf.keras.models.load_model("final_emotion_model.h5")
+
+model = load_model()
 st.set_page_config(page_title="Emotion AI Detector", page_icon="😊")
 style.apply_custom_style()
 
@@ -17,3 +23,4 @@ if uploaded_file is not None:
     
     # ทดสอบแค่แสดงผลหน้าเว็บว่าทำงานได้
     st.success("อัปโหลดไฟล์สำเร็จ! (ระบบ AI อยู่ระหว่างการปรับปรุงเวอร์ชัน)")
+
