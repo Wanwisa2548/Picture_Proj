@@ -3,18 +3,27 @@ import numpy as np
 import cv2
 from PIL import Image
 import tflite_runtime.interpreter as tflite
+import os
 
-# --- โหลดโมเดล TFLite ---
 @st.cache_resource
 def load_tflite_model():
-    interpreter = tflite.Interpreter(model_path="final_emotion_model.tflite")
+    model_path = "final_emotion_model.tflite"
+    # เพิ่มคำสั่งเช็กว่าไฟล์มีอยู่จริงไหม ถ้าไม่มีให้แจ้งเตือน
+    if not os.path.exists(model_path):
+        st.error(f"❌ ไม่พบไฟล์โมเดล: {model_path} ใน Repository ค่ะ")
+        return None
+        
+    interpreter = tflite.Interpreter(model_path=model_path)
     interpreter.allocate_tensors()
     return interpreter
 
 interpreter = load_tflite_model()
-input_details = interpreter.get_input_details()
-output_details = interpreter.get_output_details()
 
+if interpreter is not None:
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+else:
+    st.stop() # หยุดการทำงานของแอปไว้ตรงนี้ถ้าโหลดโมเดลไม่ได้
 class_names = ['angry', 'happy', 'neutral', 'sad']
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
