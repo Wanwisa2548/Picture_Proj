@@ -153,8 +153,9 @@ with tab2:
             with r_col3:
                 st.write(f"{item['Date']}")
             with r_col4:
-                # ใส่สีตามอารมณ์ให้ดูเด่นขึ้น
-                emoji_map = {"angry","happy","neutral","sad"}
+                # แสดงแค่ชื่ออารมณ์เป็นตัวหนา โดยไม่มีอิโมจิ
+                result_text = item['Result']
+                st.write(f"**{result_text.upper()}**")
                 st.write(f"**{item['Result'].upper()}** {emoji_map.get(item['Result'], '')}")
             with r_col5:
                 st.write(f"{item['Confidence']}%")
