@@ -41,31 +41,35 @@ color_map = {"angry": "#FF4B4B", "happy": "#FACA2E", "neutral": "#00CC96", "sad"
 tab1, tab2, tab3 = st.tabs(["🏠 Home (Predict)", "📜 History", "📊 Dashboard"])
 
 # --- TAB 1: หน้าหลักสำหรับการทำนาย ---
+# --- TAB 1: หน้าหลักสำหรับการทำนาย ---
 with tab1:
     st.title("😊 Emotion AI Detector")
-    st.write("อัปโหลดรูปภาพใบหน้าเพื่อให้ AI ช่วยวิเคราะห์อารมณ์")
     
-    uploaded_file = st.file_uploader("เลือกรูปภาพ...", type=["jpg", "jpeg", "png"], key="uploader")
+    # เพิ่มตัวเลือกแหล่งที่มาของรูปภาพ
+    source_radio = st.radio("เลือกช่องทางการนำเข้าเจ้าค่ะ:", ["อัปโหลดรูปภาพ", "ใช้กล้องถ่ายรูป"], horizontal=True)
+    
+    uploaded_file = None
+    
+    if source_radio == "อัปโหลดรูปภาพ":
+        uploaded_file = st.file_uploader("เลือกรูปภาพจากเครื่อง...", type=["jpg", "jpeg", "png"], key="uploader")
+    else:
+        uploaded_file = st.camera_input("ส่องหน้าแล้วกดถ่ายรูปได้เลย!")
 
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
         col1, col2 = st.columns([1, 1])
         
         with col1:
-            # --- ปรับขนาดรูปหน้าหลักให้พอดีและเท่ากันทุกรูป ---
+            # --- ปรับขนาดรูปหน้าหลักให้พอดี (300x300) ---
             display_img = image.copy()
-            # กำหนดขนาดมาตรฐานสำหรับหน้าหลัก (แนะนำ 300 หรือ 400 ตามความชอบค่ะ)
             main_size = (300, 300)
-            
-            # ย่อรูปและวางบนกรอบจตุรัส
             display_img.thumbnail(main_size)
             final_display = Image.new('RGB', main_size, (255, 255, 255))
             final_display.paste(display_img, ((main_size[0] - display_img.size[0]) // 2, 
                                               (main_size[1] - display_img.size[1]) // 2))
-            
-            # แสดงรูปโดยกำหนด width เพื่อไม่ให้มันขยายตาม container
-            st.image(final_display, caption='รูปภาพที่วิเคราะห์', width=300)
-            
+            st.image(final_display, caption='รูปภาพที่กำลังวิเคราะห์', width=300)
+        
+        # --- ส่วนประมวลผล (ใช้โค้ดเดิมของหนูได้เลย) ---
         img_array = np.array(image.convert('RGB'))
         gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
         faces = face_cascade.detectMultiScale(gray, 1.3, 5)
@@ -76,7 +80,6 @@ with tab1:
             roi_resized = cv2.resize(roi, (224, 224))
             input_data = np.expand_dims(roi_resized, axis=0).astype(np.float32)
             
-            # ทำนาย
             interpreter.set_tensor(input_details[0]['index'], input_data)
             interpreter.invoke()
             preds = interpreter.get_tensor(output_details[0]['index'])[0]
@@ -88,18 +91,19 @@ with tab1:
                 st.subheader(f"🎯 ผลลัพธ์: {result.upper()}")
                 st.write(f"✨ ความมั่นใจ: {confidence * 100:.2f}%")
                 
-                # ปุ่มบันทึกข้อมูล
                 if st.button("📥 บันทึกผลการทำนาย"):
                     data_entry = {
                         "Time": datetime.now().strftime("%H:%M:%S"),
                         "Date": datetime.now().strftime("%Y-%m-%d"),
                         "Result": result,
                         "Confidence": round(float(confidence) * 100, 2),
-                        "Image": image # เก็บรูปไว้แสดงในตาราง
+                        "Image": image
                     }
                     st.session_state.history.append(data_entry)
-                    st.success("บันทึกข้อมูลเรียบร้อยแล้ว! ไปดูที่แท็บ History ได้เลย")
-
+                    st.success("บันทึกเรียบร้อย! ไปดูที่หน้า History นะคะ")
+        else:
+            st.error("❌ ไม่พบใบหน้าในภาพ กรุณาปรับตำแหน่งหน้าให้ชัดเจนค่ะ")
+            
 # --- TAB 2: หน้าประวัติและการ Export ---
 with tab2:
     st.header("📜 ประวัติการทำนาย")
