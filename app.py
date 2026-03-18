@@ -154,7 +154,7 @@ with tab1:
 
     # กำหนดที่อยู่ของไฟล์รูปภาพ
     img_paths = {
-        "happy": "happy.jpg",
+        "happy": "happyy.jpg",
         "neutral": "17bcdc21a9708217b8e7b475f13de0e3.jpg",
         "sad": "sad.jpg",
         "angry": "angryy.jpg"
