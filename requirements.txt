@@ -2,4 +2,4 @@ streamlit
 numpy
 opencv-python-headless
 Pillow
-tensorflow-cpu==2.16.1
+tflite-runtime
