@@ -52,8 +52,20 @@ with tab1:
         col1, col2 = st.columns([1, 1])
         
         with col1:
-            st.image(image, caption='รูปภาพของคุณ', use_container_width=True)
-        
+            # --- ปรับขนาดรูปหน้าหลักให้พอดีและเท่ากันทุกรูป ---
+            display_img = image.copy()
+            # กำหนดขนาดมาตรฐานสำหรับหน้าหลัก (แนะนำ 300 หรือ 400 ตามความชอบค่ะ)
+            main_size = (300, 300)
+            
+            # ย่อรูปและวางบนกรอบจตุรัส
+            display_img.thumbnail(main_size)
+            final_display = Image.new('RGB', main_size, (255, 255, 255))
+            final_display.paste(display_img, ((main_size[0] - display_img.size[0]) // 2, 
+                                              (main_size[1] - display_img.size[1]) // 2))
+            
+            # แสดงรูปโดยกำหนด width เพื่อไม่ให้มันขยายตาม container
+            st.image(final_display, caption='รูปภาพที่วิเคราะห์', width=300)
+            
         img_array = np.array(image.convert('RGB'))
         gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
         faces = face_cascade.detectMultiScale(gray, 1.3, 5)
