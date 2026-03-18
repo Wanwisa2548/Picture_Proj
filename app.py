@@ -43,7 +43,6 @@ tab1, tab2, tab3 = st.tabs(["🏠 Home (Predict)", "📜 History", "📊 Dashboa
 
 # --- TAB 1: หน้าหลักสำหรับการทำนาย ---
 with tab1:
-    # 1. ส่วน Header ของหน้า (Hero Section)
     # 1. ส่วน Header ของหน้า (Hero Section) - ปรับปรุงใหม่ให้ดู Professional
     st.markdown("""
         <div style="
@@ -84,13 +83,13 @@ with tab1:
             </p>
         </div>
     """, unsafe_allow_html=True)
-    # 2. ส่วนแสดงรูปภาพตัวอย่างอารมณ์แบบมีมิติ
-    st.write("ตัวอย่างการวิเคราะห์อารมณ์")
+
+    # 2. ส่วนแสดงรูปภาพตัวอย่างอารมณ์แบบมีมิติ พร้อม CSS ลูกเล่น
+    st.write("### 📸 ตัวอย่างการวิเคราะห์อารมณ์")
     
-    # --- จุดที่ต้องแก้ไขคือตรงนี้ค่ะ! ต้องเคาะย่อหน้าเข้ามาให้ตรงกัน ---
     st.markdown("""
         <style>
-        /* 1. ตกแต่งกรอบ Card ให้มีลูกเล่น Gradient */
+        /* 1. ตกแต่งกรอบ Card และรูปภาพ */
         .emotion-card {
             background: #ffffff;
             padding: 10px;
@@ -104,50 +103,46 @@ with tab1:
             position: relative;
             overflow: hidden;
         }
-
         .emotion-card:hover {
             transform: translateY(-12px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.15);
             border: 1px solid #FFD700;
         }
-
-        .emotion-card .img-container {
-            width: 100%;
-            height: 220px;
-            overflow: hidden;
-            border-radius: 15px;
-        }
-
         .emotion-card img {
             width: 100%;
-            height: 100%;
+            height: 220px;
+            border-radius: 15px;
             object-fit: cover;
-            object-position: center;
             transition: transform 0.6s ease;
         }
-
         .emotion-card:hover img {
-            transform: scale(1.15);
+            transform: scale(1.1);
         }
 
-        .emotion-card h4 {
-            margin-top: 15px;
-            font-family: 'Kanit', sans-serif;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            font-weight: 700;
+        /* 2. CSS สำหรับส่วนอัปโหลดไฟล์ (ปุ่มเรืองแสง) */
+        [data-testid="stFileUploader"] {
+            background-color: #ffffff;
+            border: 2px dashed #636EFA;
+            border-radius: 20px;
+            padding: 20px;
+            transition: all 0.3s ease;
         }
-        
-        .emotion-card::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40%;
-            height: 4px;
-            background: linear-gradient(90deg, transparent, #eee, transparent);
-            border-radius: 2px;
+        [data-testid="stFileUploader"]:hover {
+            border-color: #FF4B4B;
+            box-shadow: 0 0 15px rgba(99, 110, 250, 0.2);
+        }
+        button[kind="secondary"] {
+            background: linear-gradient(135deg, #636EFA 0%, #a663fa 100%) !important;
+            color: white !important;
+            border: none !important;
+            padding: 0.5rem 2rem !important;
+            border-radius: 12px !important;
+            font-weight: bold !important;
+            box-shadow: 0 4px 15px rgba(99, 110, 250, 0.3) !important;
+        }
+        button[kind="secondary"]:hover {
+            box-shadow: 0 0 20px rgba(166, 99, 250, 0.6) !important;
+            transform: scale(1.05) !important;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -159,46 +154,52 @@ with tab1:
         "sad": "sad.jpg",
         "angry": "angryy.jpg"
     }
-    # แสดงผลรูปภาพตัวอย่างใน 4 คอลัมน์
+
     col_emo1, col_emo2, col_emo3, col_emo4 = st.columns(4, gap="large")
     
     def get_img_html(path, emotion):
-        """ฟังก์ชันช่วยแปลงรูปเป็น Base64 เพื่อแสดงใน HTML"""
         try:
-            import base64
             with open(path, "rb") as f:
                 data = base64.b64encode(f.read()).decode()
-            return f'<div class="emotion-card"><img src="data:image/jpeg;base64,{data}" /><h4 style="color: {color_map[emotion]}; margin-top: 10px;"><b>{emotion.upper()}</b></h4></div>'
+            return f'<div class="emotion-card"><img src="data:image/jpeg;base64,{data}" /><h4 style="color: {color_map[emotion]}; margin-top: 15px;"><b>{emotion.upper()}</b></h4></div>'
         except:
             return f'<div class="emotion-card"><p>ไม่พบไฟล์ {path}</p></div>'
 
-    with col_emo1:
-        st.markdown(get_img_html(img_paths["happy"], "happy"), unsafe_allow_html=True)
-    with col_emo2:
-        st.markdown(get_img_html(img_paths["neutral"], "neutral"), unsafe_allow_html=True)
-    with col_emo3:
-        st.markdown(get_img_html(img_paths["sad"], "sad"), unsafe_allow_html=True)
-    with col_emo4:
-        st.markdown(get_img_html(img_paths["angry"], "angry"), unsafe_allow_html=True)
+    with col_emo1: st.markdown(get_img_html(img_paths["happy"], "happy"), unsafe_allow_html=True)
+    with col_emo2: st.markdown(get_img_html(img_paths["neutral"], "neutral"), unsafe_allow_html=True)
+    with col_emo3: st.markdown(get_img_html(img_paths["sad"], "sad"), unsafe_allow_html=True)
+    with col_emo4: st.markdown(get_img_html(img_paths["angry"], "angry"), unsafe_allow_html=True)
 
     st.divider()
 
-    # 3. ส่วนการอัปโหลดและวิเคราะห์
-    st.write("### 🔍 เริ่มต้นการวิเคราะห์ของคุณ")
-    uploaded_file = st.file_uploader("📸 เลือกรูปภาพใบหน้าที่ต้องการวิเคราะห์...", type=["jpg", "jpeg", "png"], key="uploader")
+    # 3. ส่วนการอัปโหลดแบบใหม่ (Interactive Uploader)
+    st.write("### 📤 นำเข้าข้อมูลภาพเพื่อประมวลผล")
+    col_icon, col_text = st.columns([1, 5])
+    with col_icon:
+        st.markdown("<h1 style='text-align: center; font-size: 70px; margin: 0;'>🚀</h1>", unsafe_allow_html=True)
+    with col_text:
+        st.markdown("""
+            <div style='padding-top: 10px;'>
+                <h3 style='margin: 0; color: #1E1E1E;'>เพิ่มไฟล์ใบหน้าของคุณ</h3>
+                <p style='color: #666;'>รองรับไฟล์ JPG, JPEG และ PNG</p>
+            </div>
+        """, unsafe_allow_html=True)
 
-    st.divider()
+    uploaded_file = st.file_uploader("uploader_hidden", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
     if uploaded_file is not None:
+        # ส่วนนี้ใช้ Logic เดิมของหนูเลยค่ะ
+        st.success(f"✔️ รับข้อมูลไฟล์: {uploaded_file.name} เรียบร้อยแล้ว")
         image = Image.open(uploaded_file)
+        
+        st.divider()
         col_img, col_res = st.columns([1, 1], gap="large")
         
         with col_img:
             st.markdown('<p style="font-weight: bold; color: #333;">🖼️ ภาพที่กำลังวิเคราะห์:</p>', unsafe_allow_html=True)
-            # แสดงภาพที่อัปโหลดพร้อมใส่ Shadow
             st.image(image, use_container_width=True)
-        
-        # --- Logic การประมวลผล ---
+            
+        # --- Logic การประมวลผล (ใช้ของเดิมเป๊ะๆ) ---
         img_array = np.array(image.convert('RGB'))
         gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
         faces = face_cascade.detectMultiScale(gray, 1.3, 5)
@@ -217,7 +218,6 @@ with tab1:
                 result = class_names[np.argmax(preds)]
                 confidence = np.max(preds)
                 
-                # แสดงผลลัพธ์ในกรอบสีตามอารมณ์
                 st.markdown(f"""
                     <div style="background-color: white; padding: 25px; border-radius: 20px; border-left: 8px solid {color_map[result]}; box-shadow: 2px 5px 15px rgba(0,0,0,0.05);">
                         <h2 style="margin: 0; color: #333;">🎯 ผลลัพธ์: <span style="color: {color_map[result]};">{result.upper()}</span></h2>
