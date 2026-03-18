@@ -94,25 +94,47 @@ with tab2:
     if len(st.session_state.history) > 0:
         df = pd.DataFrame(st.session_state.history)
         
-        # แสดงตาราง (ไม่โชว์คอลัมน์รูปในตารางมาตรฐานเพื่อความสะอาด)
-        st.dataframe(df.drop(columns=['Image']), use_container_width=True)
-        
-        # ปุ่มดาวน์โหลด CSV
+        # 1. ปุ่มดาวน์โหลด CSV (เอาไว้ด้านบนสุดเพื่อให้หาง่าย)
         csv = df.drop(columns=['Image']).to_csv(index=False).encode('utf-8-sig')
         st.download_button(
-            label="📥 Export as CSV",
+            label="📥 Export ประวัติเป็นไฟล์ CSV",
             data=csv,
             file_name=f'emotion_results_{datetime.now().strftime("%Y%m%d")}.csv',
             mime='text/csv',
         )
         
         st.divider()
-        st.subheader("🖼️ รูปภาพที่บันทึกไว้")
-        # แสดงรูปวนลูป
-        cols = st.columns(4)
-        for idx, item in enumerate(st.session_state.history):
-            with cols[idx % 4]:
-                st.image(item['Image'], caption=f"{item['Result']} ({item['Confidence']}%)", use_container_width=True)
+
+        # 2. ส่วนแสดงตารางแบบมีรูปภาพ (เราจะสร้างหัวตารางก่อน)
+        # สร้างหัวข้อตารางจำลอง
+        h_col1, h_col2, h_col3, h_col4, h_col5 = st.columns([1, 1, 1, 1, 1])
+        with h_col1: st.write("**รูปใบหน้า**")
+        with h_col2: st.write("**เวลา**")
+        with h_col3: st.write("**วันที่**")
+        with h_col4: st.write("**ผลลัพธ์**")
+        with h_col5: st.write("**ความมั่นใจ**")
+        st.markdown("---")
+
+        # วนลูปเพื่อดึงข้อมูลแต่ละแถวมาแสดงพร้อมรูป
+        for item in reversed(st.session_state.history): # ใช้ reversed เพื่อให้รายการล่าสุดอยู่บน
+            r_col1, r_col2, r_col3, r_col4, r_col5 = st.columns([1, 1, 1, 1, 1])
+            
+            with r_col1:
+                # แสดงรูปภาพขนาดเล็กในแถว
+                st.image(item['Image'], use_container_width=True)
+            with r_col2:
+                st.write(f"{item['Time']}")
+            with r_col3:
+                st.write(f"{item['Date']}")
+            with r_col4:
+                # ใส่สีตามอารมณ์ให้ดูเด่นขึ้น
+                emoji_map = {"angry": "😡", "happy": "😄", "neutral": "😐", "sad": "😢"}
+                st.write(f"**{item['Result'].upper()}** {emoji_map.get(item['Result'], '')}")
+            with r_col5:
+                st.write(f"{item['Confidence']}%")
+            
+            st.markdown("<hr style='margin: 5px 0; border-top: 1px solid #eee;'>", unsafe_allow_html=True)
+
     else:
         st.info("ยังไม่มีข้อมูลถูกบันทึก")
 
