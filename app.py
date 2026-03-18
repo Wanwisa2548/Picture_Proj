@@ -2,8 +2,7 @@ import streamlit as st
 import numpy as np
 import cv2
 from PIL import Image
-import tensorflow.lite as tflite
-# import style # ตรวจสอบว่าไฟล์ style.py ของหนูมีอยู่ในโฟลเดอร์เดียวกันนะคะ
+import tflite_runtime.interpreter as tflite
 
 # --- โหลดโมเดล TFLite ---
 @st.cache_resource
