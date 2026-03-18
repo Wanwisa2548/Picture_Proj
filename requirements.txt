@@ -4,3 +4,4 @@ opencv-python-headless
 Pillow
 tflite-runtime==2.14.0
 pandas
+plotly 
