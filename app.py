@@ -42,7 +42,7 @@ tab1, tab2, tab3 = st.tabs(["🏠 Home (Predict)", "📜 History", "📊 Dashboa
 
 # --- TAB 1: หน้าหลักสำหรับการทำนาย ---
 with tab1:
-    # 1. ส่วน Header ของหน้า (ทำเป็น Hero Section เล็กๆ)
+    # 1. ส่วน Header ของหน้า (Hero Section)
     st.markdown("""
         <div style="background-color: #f0f2f6; padding: 30px; border-radius: 20px; margin-bottom: 30px; box-shadow: 0 4px 8px rgba(0,0,0,0.05);">
             <h1 style="text-align: center; color: #0E1117; font-size: 3em;">😊 Emotion AI Detector</h1>
@@ -50,12 +50,11 @@ with tab1:
         </div>
     """, unsafe_allow_html=True)
 
-    # 2. ส่วนแสดงรูปภาพตัวอย่างอารมณ์แบบมีมิติ ( dimensional frame)
+    # 2. ส่วนแสดงรูปภาพตัวอย่างอารมณ์แบบมีมิติ
     st.write("### 📸 ตัวอย่างการวิเคราะห์อารมณ์")
     
-    # กำหนด CSS สำหรับกรอบรูปที่มีมิติ
-    st.markdown(
-        """
+    # CSS สำหรับตกแต่ง Card และรูปภาพ
+    st.markdown("""
         <style>
         .emotion-card {
             background: white;
@@ -77,47 +76,41 @@ with tab1:
             height: auto;
         }
         </style>
-        """, unsafe_allow_html=True
-    )
+    """, unsafe_allow_html=True)
 
-    # แสดงรูปภาพตัวอย่างอารมณ์ใน 4 คอลัมน์
+    # กำหนดที่อยู่ของไฟล์รูปภาพ (หนูเช็คชื่อไฟล์ตรงนี้ให้ตรงกับในเครื่องนะคะ)
+    img_paths = {
+        "happy": "Screenshot 2026-03-19 005239",
+        "neutral": Screenshot 2026-03-19 005301",
+        "sad": "Screenshot 2026-03-19 005322",
+        "angry": Screenshot 2026-03-19 005351"
+    }
+
+    # แสดงผลรูปภาพตัวอย่างใน 4 คอลัมน์
     col_emo1, col_emo2, col_emo3, col_emo4 = st.columns(4, gap="large")
+    
+    def get_img_html(path, emotion):
+        """ฟังก์ชันช่วยแปลงรูปเป็น Base64 เพื่อแสดงใน HTML"""
+        try:
+            import base64
+            with open(path, "rb") as f:
+                data = base64.b64encode(f.read()).decode()
+            return f'<div class="emotion-card"><img src="data:image/jpeg;base64,{data}" /><h4 style="color: {color_map[emotion]}; margin-top: 10px;"><b>{emotion.upper()}</b></h4></div>'
+        except:
+            return f'<div class="emotion-card"><p>ไม่พบไฟล์ {path}</p></div>'
 
     with col_emo1:
-        st.markdown(f"""
-            <div class="emotion-card">
-                
-                <h4 style="color: {color_map['happy']}; margin-top: 10px;"><b>HAPPY</b></h4>
-            </div>
-        """, unsafe_allow_html=True)
-        
+        st.markdown(get_img_html(img_paths["happy"], "happy"), unsafe_allow_html=True)
     with col_emo2:
-        st.markdown(f"""
-            <div class="emotion-card">
-                
-                <h4 style="color: {color_map['neutral']}; margin-top: 10px;"><b>NEUTRAL</b></h4>
-            </div>
-        """, unsafe_allow_html=True)
-        
+        st.markdown(get_img_html(img_paths["neutral"], "neutral"), unsafe_allow_html=True)
     with col_emo3:
-        st.markdown(f"""
-            <div class="emotion-card">
-                
-                <h4 style="color: {color_map['sad']}; margin-top: 10px;"><b>SAD</b></h4>
-            </div>
-        """, unsafe_allow_html=True)
-        
+        st.markdown(get_img_html(img_paths["sad"], "sad"), unsafe_allow_html=True)
     with col_emo4:
-        st.markdown(f"""
-            <div class="emotion-card">
-                
-                <h4 style="color: {color_map['angry']}; margin-top: 10px;"><b>ANGRY</b></h4>
-            </div>
-        """, unsafe_allow_html=True)
+        st.markdown(get_img_html(img_paths["angry"], "angry"), unsafe_allow_html=True)
 
     st.divider()
 
-    # 3. ส่วนการอัปโหลดและวิเคราะห์ (Logic เดิมของหนู)
+    # 3. ส่วนการอัปโหลดและวิเคราะห์
     st.write("### 🔍 เริ่มต้นการวิเคราะห์ของคุณ")
     uploaded_file = st.file_uploader("📸 เลือกรูปภาพใบหน้าที่ต้องการวิเคราะห์...", type=["jpg", "jpeg", "png"], key="uploader")
 
@@ -125,35 +118,14 @@ with tab1:
 
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
-        
-        # ใช้ columns เพื่อแยกส่วนรูปภาพกับผลลัพธ์
         col_img, col_res = st.columns([1, 1], gap="large")
         
         with col_img:
-            # --- เทคนิคเพิ่มมิติให้รูปภาพที่อัปโหลด (Shadow & Frame) ---
             st.markdown('<p style="font-weight: bold; color: #333;">🖼️ ภาพที่กำลังวิเคราะห์:</p>', unsafe_allow_html=True)
-            
-            # ตกแต่งรูปภาพที่อัปโหลดด้วย CSS ผ่าน st.markdown
-            st.markdown(
-                """
-                <style>
-                .main-img {
-                    border-radius: 20px;
-                    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-                    border: 5px solid white;
-                    transition: transform .2s;
-                }
-                .main-img:hover {
-                    transform: scale(1.02);
-                }
-                </style>
-                """, unsafe_allow_html=True
-            )
-            
-            # แสดงรูปภาพที่อัปโหลด (ใช้ container width)
+            # แสดงภาพที่อัปโหลดพร้อมใส่ Shadow
             st.image(image, use_container_width=True)
         
-        # --- ส่วนประมวลผล (Logic เดิมของหนู) ---
+        # --- Logic การประมวลผล ---
         img_array = np.array(image.convert('RGB'))
         gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
         faces = face_cascade.detectMultiScale(gray, 1.3, 5)
@@ -172,7 +144,7 @@ with tab1:
                 result = class_names[np.argmax(preds)]
                 confidence = np.max(preds)
                 
-                # --- ตกแต่งส่วนแสดงผลลัพธ์ให้น่าตื่นเต้น ---
+                # แสดงผลลัพธ์ในกรอบสีตามอารมณ์
                 st.markdown(f"""
                     <div style="background-color: white; padding: 25px; border-radius: 20px; border-left: 8px solid {color_map[result]}; box-shadow: 2px 5px 15px rgba(0,0,0,0.05);">
                         <h2 style="margin: 0; color: #333;">🎯 ผลลัพธ์: <span style="color: {color_map[result]};">{result.upper()}</span></h2>
@@ -180,7 +152,7 @@ with tab1:
                     </div>
                 """, unsafe_allow_html=True)
                 
-                st.write("") # เว้นวรรค
+                st.write("") 
                 if st.button("📥 บันทึกผลลัพธ์เข้าสู่ระบบ", use_container_width=True):
                     data_entry = {
                         "Time": datetime.now().strftime("%H:%M:%S"),
