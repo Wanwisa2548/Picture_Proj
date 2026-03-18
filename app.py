@@ -54,7 +54,7 @@ with tab1:
     # 2. ส่วนแสดงรูปภาพตัวอย่างอารมณ์แบบมีมิติ
     st.write("### 📸 ตัวอย่างการวิเคราะห์อารมณ์")
     
-    # CSS สำหรับตกแต่ง Card และรูปภาพ
+  # 1. ปรับ CSS ในส่วน st.markdown ด้านบน
     st.markdown("""
         <style>
         .emotion-card {
@@ -66,15 +66,14 @@ with tab1:
             transition: transform 0.3s ease;
             text-align: center;
             margin-bottom: 20px;
-        }
-        .emotion-card:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            height: 320px; /* กำหนดความสูงของกรอบให้เท่ากันทั้งหมด */
         }
         .emotion-card img {
             border-radius: 10px;
-            max-width: 100%;
-            height: auto;
+            width: 100%;       /* บังคับความกว้าง */
+            height: 200px;     /* บังคับความสูงของตัวรูปภาพ (ปรับเลขนี้ได้ตามชอบ) */
+            object-fit: cover; /* สำคัญมาก! ทำให้รูปไม่ยืด แต่จะครอปส่วนที่เกินแทน */
+            object-position: center; /* ให้เน้นจุดกึ่งกลางของภาพ */
         }
         </style>
     """, unsafe_allow_html=True)
