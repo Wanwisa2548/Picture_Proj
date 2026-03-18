@@ -120,8 +120,22 @@ with tab2:
             r_col1, r_col2, r_col3, r_col4, r_col5 = st.columns([1, 1, 1, 1, 1])
             
             with r_col1:
-                # แสดงรูปภาพขนาดเล็กในแถว
-                st.image(item['Image'], use_container_width=True)
+                # --- ส่วนที่ปรับปรุงใหม่: ปรับขนาดรูปให้เท่ากัน ---
+                img = item['Image'].copy() # คัดลอกรูปออกมา
+                
+                # กำหนดขนาดที่ต้องการ (กว้าง, สูง)
+                target_size = (150, 150) 
+                
+                # ปรับให้เป็นรูปสี่เหลี่ยมจัตุรัสและขนาดเท่ากัน (Thumbnail)
+                img.thumbnail(target_size)
+                
+                # สร้างพื้นหลังสีขาวขนาด 150x150 เพื่อให้รูปทุกรูปวางบนกรอบที่เท่ากันเป๊ะ
+                final_img = Image.new('RGB', target_size, (255, 255, 255))
+                # วางรูปลงไปตรงกลางกรอบ
+                final_img.paste(img, ((target_size[0] - img.size[0]) // 2, 
+                                      (target_size[1] - img.size[1]) // 2))
+                
+                st.image(final_img, width=150) # แสดงรูปขนาด 150px
             with r_col2:
                 st.write(f"{item['Time']}")
             with r_col3:
