@@ -52,16 +52,16 @@ with tab1:
     """, unsafe_allow_html=True)
 
     # 2. ส่วนแสดงรูปภาพตัวอย่างอารมณ์แบบมีมิติ
-    st.write("### 📸 ตัวอย่างการวิเคราะห์อารมณ์")
+    st.write("ตัวอย่างการวิเคราะห์อารมณ์")
     
- st.markdown("""
+    # --- จุดที่ต้องแก้ไขคือตรงนี้ค่ะ! ต้องเคาะย่อหน้าเข้ามาให้ตรงกัน ---
+    st.markdown("""
         <style>
         /* 1. ตกแต่งกรอบ Card ให้มีลูกเล่น Gradient */
         .emotion-card {
             background: #ffffff;
             padding: 10px;
             border-radius: 20px;
-            /* เพิ่มเงาแบบฟุ้งๆ ดูมีมิติ */
             box-shadow: 0 10px 30px rgba(0,0,0,0.08);
             border: 1px solid rgba(0,0,0,0.05);
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -72,18 +72,16 @@ with tab1:
             overflow: hidden;
         }
 
-        /* 2. เอฟเฟกต์เมื่อเอาเมาส์ไปวาง (Hover) */
         .emotion-card:hover {
-            transform: translateY(-12px); /* ลอยสูงขึ้น */
+            transform: translateY(-12px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-            border: 1px solid #FFD700; /* เปลี่ยนสีขอบเมื่อชี้ */
+            border: 1px solid #FFD700;
         }
 
-        /* 3. จัดการรูปภาพให้สวยงามและมี Zoom Effect */
         .emotion-card .img-container {
             width: 100%;
             height: 220px;
-            overflow: hidden; /* บังส่วนที่ล้นตอน Zoom */
+            overflow: hidden;
             border-radius: 15px;
         }
 
@@ -92,14 +90,13 @@ with tab1:
             height: 100%;
             object-fit: cover;
             object-position: center;
-            transition: transform 0.6s ease; /* หน่วงเวลาตอนขยายรูป */
+            transition: transform 0.6s ease;
         }
 
         .emotion-card:hover img {
-            transform: scale(1.15); /* รูปขยายขึ้นเมื่อเอาเมาส์ชี้ */
+            transform: scale(1.15);
         }
 
-        /* 4. ตกแต่งตัวหนังสือ (Emotion Name) */
         .emotion-card h4 {
             margin-top: 15px;
             font-family: 'Kanit', sans-serif;
@@ -108,7 +105,6 @@ with tab1:
             font-weight: 700;
         }
         
-        /* 5. เพิ่มแถบสีเล็กๆ ด้านล่างให้ดูมีดีไซน์ */
         .emotion-card::after {
             content: '';
             position: absolute;
@@ -122,14 +118,14 @@ with tab1:
         }
         </style>
     """, unsafe_allow_html=True)
-    # กำหนดที่อยู่ของไฟล์รูปภาพ (หนูเช็คชื่อไฟล์ตรงนี้ให้ตรงกับในเครื่องนะคะ)
+
+    # กำหนดที่อยู่ของไฟล์รูปภาพ
     img_paths = {
         "happy": "happy.jpg",
         "neutral": "neutral.jpg",
         "sad": "sad.jpg",
         "angry": "angry.jpg"
     }
-
     # แสดงผลรูปภาพตัวอย่างใน 4 คอลัมน์
     col_emo1, col_emo2, col_emo3, col_emo4 = st.columns(4, gap="large")
     
