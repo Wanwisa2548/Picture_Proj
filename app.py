@@ -44,13 +44,81 @@ tab1, tab2, tab3 = st.tabs(["🏠 Home (Predict)", "📜 History", "📊 Dashboa
 with tab1:
     # 1. ส่วน Header ของหน้า (ทำเป็น Hero Section เล็กๆ)
     st.markdown("""
-        <div style="background-color: #f0f2f6; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
-            <h1 style="text-align: center; color: #0E1117;">😊 Emotion AI Detector</h1>
-            <p style="text-align: center; color: #555;">ปลดล็อกความรู้สึกผ่านใบหน้าด้วยระบบวิเคราะห์อัจฉริยะ</p>
+        <div style="background-color: #f0f2f6; padding: 30px; border-radius: 20px; margin-bottom: 30px; box-shadow: 0 4px 8px rgba(0,0,0,0.05);">
+            <h1 style="text-align: center; color: #0E1117; font-size: 3em;">😊 Emotion AI Detector</h1>
+            <p style="text-align: center; color: #555; font-size: 1.2em;">ปลดล็อกความรู้สึกผ่านใบหน้าด้วยระบบวิเคราะห์อัจฉริยะ</p>
         </div>
     """, unsafe_allow_html=True)
 
-    # 2. ส่วนการอัปโหลด (จัดให้อยู่ตรงกลาง)
+    # 2. ส่วนแสดงรูปภาพตัวอย่างอารมณ์แบบมีมิติ ( dimensional frame)
+    st.write("### 📸 ตัวอย่างการวิเคราะห์อารมณ์")
+    
+    # กำหนด CSS สำหรับกรอบรูปที่มีมิติ
+    st.markdown(
+        """
+        <style>
+        .emotion-card {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border: 3px solid #eee;
+            transition: transform 0.3s ease;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .emotion-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+        .emotion-card img {
+            border-radius: 10px;
+            max-width: 100%;
+            height: auto;
+        }
+        </style>
+        """, unsafe_allow_html=True
+    )
+
+    # แสดงรูปภาพตัวอย่างอารมณ์ใน 4 คอลัมน์
+    col_emo1, col_emo2, col_emo3, col_emo4 = st.columns(4, gap="large")
+
+    with col_emo1:
+        st.markdown(f"""
+            <div class="emotion-card">
+                
+                <h4 style="color: {color_map['happy']}; margin-top: 10px;"><b>HAPPY</b></h4>
+            </div>
+        """, unsafe_allow_html=True)
+        
+    with col_emo2:
+        st.markdown(f"""
+            <div class="emotion-card">
+                
+                <h4 style="color: {color_map['neutral']}; margin-top: 10px;"><b>NEUTRAL</b></h4>
+            </div>
+        """, unsafe_allow_html=True)
+        
+    with col_emo3:
+        st.markdown(f"""
+            <div class="emotion-card">
+                
+                <h4 style="color: {color_map['sad']}; margin-top: 10px;"><b>SAD</b></h4>
+            </div>
+        """, unsafe_allow_html=True)
+        
+    with col_emo4:
+        st.markdown(f"""
+            <div class="emotion-card">
+                
+                <h4 style="color: {color_map['angry']}; margin-top: 10px;"><b>ANGRY</b></h4>
+            </div>
+        """, unsafe_allow_html=True)
+
+    st.divider()
+
+    # 3. ส่วนการอัปโหลดและวิเคราะห์ (Logic เดิมของหนู)
+    st.write("### 🔍 เริ่มต้นการวิเคราะห์ของคุณ")
     uploaded_file = st.file_uploader("📸 เลือกรูปภาพใบหน้าที่ต้องการวิเคราะห์...", type=["jpg", "jpeg", "png"], key="uploader")
 
     st.divider()
@@ -62,10 +130,10 @@ with tab1:
         col_img, col_res = st.columns([1, 1], gap="large")
         
         with col_img:
-            # --- เทคนิคเพิ่มมิติให้รูปภาพ (Shadow & Frame) ---
+            # --- เทคนิคเพิ่มมิติให้รูปภาพที่อัปโหลด (Shadow & Frame) ---
             st.markdown('<p style="font-weight: bold; color: #333;">🖼️ ภาพที่กำลังวิเคราะห์:</p>', unsafe_allow_html=True)
             
-            # ตกแต่งรูปภาพด้วย CSS ผ่าน st.markdown
+            # ตกแต่งรูปภาพที่อัปโหลดด้วย CSS ผ่าน st.markdown
             st.markdown(
                 """
                 <style>
@@ -82,7 +150,7 @@ with tab1:
                 """, unsafe_allow_html=True
             )
             
-            # แสดงรูปภาพ (ปรับขนาดให้น่าสนใจ)
+            # แสดงรูปภาพที่อัปโหลด (ใช้ container width)
             st.image(image, use_container_width=True)
         
         # --- ส่วนประมวลผล (Logic เดิมของหนู) ---
