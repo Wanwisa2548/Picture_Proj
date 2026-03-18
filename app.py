@@ -42,48 +42,78 @@ tab1, tab2, tab3 = st.tabs(["🏠 Home (Predict)", "📜 History", "📊 Dashboa
 
 # --- TAB 1: หน้าหลักสำหรับการทำนาย ---
 with tab1:
-    st.title("😊 Emotion AI Detector")
-    st.write("อัปโหลดรูปภาพใบหน้าเพื่อให้ AI ช่วยวิเคราะห์อารมณ์")
-    
-    uploaded_file = st.file_uploader("เลือกรูปภาพจากเครื่อง...", type=["jpg", "jpeg", "png"], key="uploader")
+    # 1. ส่วน Header ของหน้า (ทำเป็น Hero Section เล็กๆ)
+    st.markdown("""
+        <div style="background-color: #f0f2f6; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+            <h1 style="text-align: center; color: #0E1117;">😊 Emotion AI Detector</h1>
+            <p style="text-align: center; color: #555;">ปลดล็อกความรู้สึกผ่านใบหน้าด้วยระบบวิเคราะห์อัจฉริยะ</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    # 2. ส่วนการอัปโหลด (จัดให้อยู่ตรงกลาง)
+    uploaded_file = st.file_uploader("📸 เลือกรูปภาพใบหน้าที่ต้องการวิเคราะห์...", type=["jpg", "jpeg", "png"], key="uploader")
 
     st.divider()
 
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
-        col1, col2 = st.columns([1, 1])
         
-        with col1:
-            display_img = image.copy()
-            main_size = (300, 300)
-            display_img.thumbnail(main_size)
-            final_display = Image.new('RGB', main_size, (255, 255, 255))
-            final_display.paste(display_img, ((main_size[0] - display_img.size[0]) // 2, 
-                                              (main_size[1] - display_img.size[1]) // 2))
-            st.image(final_display, caption='รูปภาพที่กำลังวิเคราะห์', width=300)
+        # ใช้ columns เพื่อแยกส่วนรูปภาพกับผลลัพธ์
+        col_img, col_res = st.columns([1, 1], gap="large")
         
+        with col_img:
+            # --- เทคนิคเพิ่มมิติให้รูปภาพ (Shadow & Frame) ---
+            st.markdown('<p style="font-weight: bold; color: #333;">🖼️ ภาพที่กำลังวิเคราะห์:</p>', unsafe_allow_html=True)
+            
+            # ตกแต่งรูปภาพด้วย CSS ผ่าน st.markdown
+            st.markdown(
+                """
+                <style>
+                .main-img {
+                    border-radius: 20px;
+                    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+                    border: 5px solid white;
+                    transition: transform .2s;
+                }
+                .main-img:hover {
+                    transform: scale(1.02);
+                }
+                </style>
+                """, unsafe_allow_html=True
+            )
+            
+            # แสดงรูปภาพ (ปรับขนาดให้น่าสนใจ)
+            st.image(image, use_container_width=True)
+        
+        # --- ส่วนประมวลผล (Logic เดิมของหนู) ---
         img_array = np.array(image.convert('RGB'))
         gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
         faces = face_cascade.detectMultiScale(gray, 1.3, 5)
 
-        if len(faces) > 0:
-            (x, y, w, h) = faces[0]
-            roi = img_array[max(0, y - int(h*0.2)):y+h, x:x+w]
-            roi_resized = cv2.resize(roi, (224, 224))
-            input_data = np.expand_dims(roi_resized, axis=0).astype(np.float32)
-            
-            interpreter.set_tensor(input_details[0]['index'], input_data)
-            interpreter.invoke()
-            preds = interpreter.get_tensor(output_details[0]['index'])[0]
-            
-            result = class_names[np.argmax(preds)]
-            confidence = np.max(preds)
-            
-            with col2:
-                st.subheader(f"🎯 ผลลัพธ์: {result.upper()}")
-                st.write(f"✨ ความมั่นใจ: {confidence * 100:.2f}%")
+        with col_res:
+            if len(faces) > 0:
+                (x, y, w, h) = faces[0]
+                roi = img_array[max(0, y - int(h*0.2)):y+h, x:x+w]
+                roi_resized = cv2.resize(roi, (224, 224))
+                input_data = np.expand_dims(roi_resized, axis=0).astype(np.float32)
                 
-                if st.button("📥 บันทึกผลการทำนาย"):
+                interpreter.set_tensor(input_details[0]['index'], input_data)
+                interpreter.invoke()
+                preds = interpreter.get_tensor(output_details[0]['index'])[0]
+                
+                result = class_names[np.argmax(preds)]
+                confidence = np.max(preds)
+                
+                # --- ตกแต่งส่วนแสดงผลลัพธ์ให้น่าตื่นเต้น ---
+                st.markdown(f"""
+                    <div style="background-color: white; padding: 25px; border-radius: 20px; border-left: 8px solid {color_map[result]}; box-shadow: 2px 5px 15px rgba(0,0,0,0.05);">
+                        <h2 style="margin: 0; color: #333;">🎯 ผลลัพธ์: <span style="color: {color_map[result]};">{result.upper()}</span></h2>
+                        <h4 style="color: #666; margin-top: 10px;">✨ ความเชื่อมั่น: {confidence * 100:.2f}%</h4>
+                    </div>
+                """, unsafe_allow_html=True)
+                
+                st.write("") # เว้นวรรค
+                if st.button("📥 บันทึกผลลัพธ์เข้าสู่ระบบ", use_container_width=True):
                     data_entry = {
                         "Time": datetime.now().strftime("%H:%M:%S"),
                         "Date": datetime.now().strftime("%Y-%m-%d"),
@@ -92,10 +122,10 @@ with tab1:
                         "Image": image
                     }
                     st.session_state.history.append(data_entry)
-                    st.success("บันทึกเรียบร้อย! ไปดูที่หน้า History นะคะ")
-        else:
-            st.error("❌ ไม่พบใบหน้าในภาพ กรุณาเลือกรูปที่มีใบหน้าชัดเจนค่ะ")
-            
+                    st.success("✅ บันทึกข้อมูลเรียบร้อยแล้ว!")
+            else:
+                st.error("❌ ไม่พบใบหน้าในภาพ กรุณาลองใหม่อีกครั้งค่ะ")
+                
 # --- TAB 2: หน้าประวัติและการ Export ---
 with tab2:
     st.header("📜 ประวัติการทำนาย")
