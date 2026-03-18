@@ -3,3 +3,4 @@ numpy<2.0.0
 opencv-python-headless
 Pillow
 tflite-runtime==2.14.0
+pandas
