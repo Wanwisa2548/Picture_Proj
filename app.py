@@ -155,7 +155,6 @@ with tab2:
             with r_col4:
                 # แสดงแค่ชื่ออารมณ์เป็นตัวหนา โดยไม่มีอิโมจิ
                 result_text = item['Result']
-                st.write(f"**{result_text.upper()}**")
                 st.write(f"**{item['Result'].upper()}**")
             with r_col5:
                 st.write(f"{item['Confidence']}%")
