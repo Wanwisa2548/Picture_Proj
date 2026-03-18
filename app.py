@@ -212,10 +212,13 @@ with tab3:
         most_frequent = summary_stats.loc[summary_stats['จำนวนครั้งที่พบ (ครั้ง)'].idxmax(), 'อารมณ์']
 
         st.info(f"""
-        **💡 Insight จากข้อมูล:**
-        * AI ของเราทำนายอารมณ์ **{best_emotion.upper()}** ได้มั่นใจที่สุด (แม่นยำที่สุด)
-        * อารมณ์ที่ระบบตรวจพบโต้ตอบบ่อยที่สุดคือ **{most_frequent.upper()}**
-        * ค่าเฉลี่ยความเชื่อมั่นโดยรวมของระบบคือ **{df['Confidence'].mean():.2f}%**
+        **📊 บทวิเคราะห์สรุปผล (Deep Insights):**
+        
+        * **Model Precision & Reliability:** จากข้อมูลทางสถิติ พบว่าโมเดลมีระดับความเชื่อมั่น (Confidence Score) สูงสุดในการจำแนกสภาวะอารมณ์ **{best_emotion.upper()}** ซึ่งสะท้อนถึงประสิทธิภาพการประมวลผลคุณลักษณะ (Feature Extraction) ที่มีความแม่นยำสูงสุดในหมวดหมู่นี้
+        
+        * **Frequency Distribution:** สภาวะอารมณ์ที่ระบบตรวจพบความถี่ในการปฏิสัมพันธ์ (Interaction Frequency) สูงที่สุดคือ **{most_frequent.upper()}**
+        
+        * **Overall System Performance:** ค่าเฉลี่ยความเชื่อมั่นโดยรวมของระบบ (Overall Average Confidence) อยู่ที่ระดับ **{df['Confidence'].mean():.2f}%** ซึ่งเป็นตัวบ่งชี้ถึงเสถียรภาพในการวิเคราะห์เชิงปริมาณของแบบจำลองในสภาวะการใช้งานจริง
         """)
         
         st.divider()
