@@ -7,6 +7,7 @@ import os
 import pandas as pd
 from datetime import datetime
 import plotly.express as px
+import base64
 
 # --- การตั้งค่าพื้นฐาน ---
 st.set_page_config(page_title="Emotion AI Detector", layout="wide")
