@@ -8,8 +8,45 @@ import pandas as pd
 from datetime import datetime
 import plotly.express as px
 
+
+
 # --- การตั้งค่าพื้นฐาน ---
 st.set_page_config(page_title="Emotion AI Detector", layout="wide")
+
+# --- ปรับแต่ง UI ด้วย CSS ---
+st.markdown("""
+    <style>
+    /* ปรับแต่งปุ่มเลือก (Radio Button) ให้ดูมีกรอบและเงา */
+    div[data-testid="stRadio"] > div {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border: 1px solid #e0e0e0;
+    }
+    
+    /* ปรับแต่งปุ่มกด (Buttons) ให้มีมิติ */
+    .stButton > button {
+        width: 100%;
+        border-radius: 10px;
+        height: 3em;
+        background-color: #ffffff;
+        border: 1px solid #ff4b4b;
+        color: #ff4b4b;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    /* เอฟเฟกต์ตอนเอาเมาส์ไปชี้ปุ่ม */
+    .stButton > button:hover {
+        background-color: #ff4b4b;
+        color: white;
+        box-shadow: 0 6px 8px rgba(255, 75, 75, 0.2);
+        transform: translateY(-2px);
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 # สร้างที่เก็บข้อมูลใน Session (ถ้ายังไม่มี)
 if 'history' not in st.session_state:
@@ -41,14 +78,18 @@ color_map = {"angry": "#FF4B4B", "happy": "#FACA2E", "neutral": "#00CC96", "sad"
 tab1, tab2, tab3 = st.tabs(["🏠 Home (Predict)", "📜 History", "📊 Dashboard"])
 
 # --- TAB 1: หน้าหลักสำหรับการทำนาย ---
-# --- TAB 1: หน้าหลักสำหรับการทำนาย ---
 with tab1:
     st.title("😊 Emotion AI Detector")
+    st.write("เลือกวิธีนำเข้าภาพที่ท่านสะดวกด้านล่างนี้เจ้าค่ะ")
     
-    # เพิ่มตัวเลือกแหล่งที่มาของรูปภาพ
-    source_radio = st.radio("เลือกช่องทางการนำเข้าเจ้าค่ะ:", ["อัปโหลดรูปภาพ", "ใช้กล้องถ่ายรูป"], horizontal=True)
+    # ปรับข้อความตัวเลือกให้ดูน่ารักและชัดเจน
+    source_radio = st.radio(
+        "ช่องทางการวิเคราะห์:", 
+        ["📁 อัปโหลดรูปภาพ", "📸 ใช้กล้องถ่ายรูป"], 
+        horizontal=True
+    )
     
-    uploaded_file = None
+    st.divider()
     
     if source_radio == "อัปโหลดรูปภาพ":
         uploaded_file = st.file_uploader("เลือกรูปภาพจากเครื่อง...", type=["jpg", "jpeg", "png"], key="uploader")
