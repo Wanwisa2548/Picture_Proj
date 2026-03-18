@@ -2,7 +2,7 @@ import streamlit as st
 import numpy as np
 import cv2
 from PIL import Image
-import tensorflow.lite as tflite  # ใช้ตัวนี้ตามที่ลงใน requirements.txt
+import tflite_runtime.interpreter as tflite
 
 # --- โหลดโมเดล TFLite ---
 @st.cache_resource
