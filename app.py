@@ -41,12 +41,10 @@ color_map = {"angry": "#FF4B4B", "happy": "#FACA2E", "neutral": "#00CC96", "sad"
 tab1, tab2, tab3 = st.tabs(["🏠 Home (Predict)", "📜 History", "📊 Dashboard"])
 
 # --- TAB 1: หน้าหลักสำหรับการทำนาย ---
-# --- TAB 1: หน้าหลักสำหรับการทำนาย ---
 with tab1:
     st.title("😊 Emotion AI Detector")
     st.write("อัปโหลดรูปภาพใบหน้าเพื่อให้ AI ช่วยวิเคราะห์อารมณ์")
     
-    # กลับมาใช้การอัปโหลดไฟล์อย่างเดียวตามคำขอค่ะ
     uploaded_file = st.file_uploader("เลือกรูปภาพจากเครื่อง...", type=["jpg", "jpeg", "png"], key="uploader")
 
     st.divider()
@@ -56,7 +54,6 @@ with tab1:
         col1, col2 = st.columns([1, 1])
         
         with col1:
-            # --- ปรับขนาดรูปหน้าหลักให้พอดี (300x300) ---
             display_img = image.copy()
             main_size = (300, 300)
             display_img.thumbnail(main_size)
@@ -65,7 +62,6 @@ with tab1:
                                               (main_size[1] - display_img.size[1]) // 2))
             st.image(final_display, caption='รูปภาพที่กำลังวิเคราะห์', width=300)
         
-        # --- ส่วนประมวลผล ---
         img_array = np.array(image.convert('RGB'))
         gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
         faces = face_cascade.detectMultiScale(gray, 1.3, 5)
@@ -106,7 +102,6 @@ with tab2:
     if len(st.session_state.history) > 0:
         df = pd.DataFrame(st.session_state.history)
         
-        # 1. ปุ่มดาวน์โหลด CSV (เอาไว้ด้านบนสุดเพื่อให้หาง่าย)
         csv = df.drop(columns=['Image']).to_csv(index=False).encode('utf-8-sig')
         st.download_button(
             label="📥 Export ประวัติเป็นไฟล์ CSV",
@@ -117,8 +112,6 @@ with tab2:
         
         st.divider()
 
-        # 2. ส่วนแสดงตารางแบบมีรูปภาพ (เราจะสร้างหัวตารางก่อน)
-        # สร้างหัวข้อตารางจำลอง
         h_col1, h_col2, h_col3, h_col4, h_col5 = st.columns([1, 1, 1, 1, 1])
         with h_col1: st.write("**รูปใบหน้า**")
         with h_col2: st.write("**เวลา**")
@@ -127,40 +120,27 @@ with tab2:
         with h_col5: st.write("**ความมั่นใจ**")
         st.markdown("---")
 
-        # วนลูปเพื่อดึงข้อมูลแต่ละแถวมาแสดงพร้อมรูป
-        for item in reversed(st.session_state.history): # ใช้ reversed เพื่อให้รายการล่าสุดอยู่บน
+        for item in reversed(st.session_state.history):
             r_col1, r_col2, r_col3, r_col4, r_col5 = st.columns([1, 1, 1, 1, 1])
             
             with r_col1:
-                # --- ส่วนที่ปรับปรุงใหม่: ปรับขนาดรูปให้เท่ากัน ---
-                img = item['Image'].copy() # คัดลอกรูปออกมา
-                
-                # กำหนดขนาดที่ต้องการ (กว้าง, สูง)
+                img = item['Image'].copy()
                 target_size = (150, 150) 
-                
-                # ปรับให้เป็นรูปสี่เหลี่ยมจัตุรัสและขนาดเท่ากัน (Thumbnail)
                 img.thumbnail(target_size)
-                
-                # สร้างพื้นหลังสีขาวขนาด 150x150 เพื่อให้รูปทุกรูปวางบนกรอบที่เท่ากันเป๊ะ
                 final_img = Image.new('RGB', target_size, (255, 255, 255))
-                # วางรูปลงไปตรงกลางกรอบ
                 final_img.paste(img, ((target_size[0] - img.size[0]) // 2, 
                                       (target_size[1] - img.size[1]) // 2))
-                
-                st.image(final_img, width=150) # แสดงรูปขนาด 150px
+                st.image(final_img, width=150)
             with r_col2:
                 st.write(f"{item['Time']}")
             with r_col3:
                 st.write(f"{item['Date']}")
             with r_col4:
-                # แสดงแค่ชื่ออารมณ์เป็นตัวหนา โดยไม่มีอิโมจิ
-                result_text = item['Result']
                 st.write(f"**{item['Result'].upper()}**")
             with r_col5:
                 st.write(f"{item['Confidence']}%")
             
             st.markdown("<hr style='margin: 5px 0; border-top: 1px solid #eee;'>", unsafe_allow_html=True)
-
     else:
         st.info("ยังไม่มีข้อมูลถูกบันทึก")
 
@@ -170,14 +150,12 @@ with tab3:
     if len(st.session_state.history) > 0:
         df = pd.DataFrame(st.session_state.history)
         
-        # เตรียมข้อมูลสำหรับกราฟ Pie และ Bar (นับจำนวนอารมณ์)
         pie_df = df['Result'].value_counts().reset_index()
         pie_df.columns = ['Emotion', 'Count']
 
         # แถวที่ 1: Metric สรุป
         m1, m2, m3 = st.columns(3)
         m1.metric("Total Scans", len(df))
-        # หาอารมณ์ที่พบบ่อยที่สุด (ถ้ามีหลายอันเท่ากันจะเลือกอันแรก)
         most_common = df['Result'].mode()[0]
         m2.metric("Most Common", most_common.upper())
         m3.metric("Avg. Confidence", f"{df['Confidence'].mean():.2f}%")
@@ -186,10 +164,8 @@ with tab3:
 
         # แถวที่ 2: กราฟ Pie และ Line
         col_chart1, col_chart2 = st.columns(2)
-        
         with col_chart1:
             st.write("### 🍰 สัดส่วนอารมณ์ที่พบ (Pie Chart)")
-            # ใช้ Plotly สร้างกราฟวงกลม
             fig = px.pie(pie_df, values='Count', names='Emotion', 
                          color='Emotion',
                          color_discrete_map=color_map)
@@ -201,21 +177,55 @@ with tab3:
 
         st.divider()
 
-        # แถวที่ 3: กราฟแท่งแบบ Plotly (แยกสีสวยงาม)
+        # แถวที่ 3: กราฟแท่ง
         st.write("### 📊 จำนวนครั้งที่พบแต่ละอารมณ์ (Bar Chart)")
         fig2 = px.bar(pie_df, x='Emotion', y='Count', color='Emotion',
                       color_discrete_map=color_map, text='Count')
-        fig2.update_traces(textposition='outside') # โชว์ตัวเลขบนแท่ง
+        fig2.update_traces(textposition='outside')
         st.plotly_chart(fig2, use_container_width=True)
         
         st.divider()
+
+        # --- ส่วนที่ 2: ตารางสถิติเชิงลึก ---
+        st.subheader("🎯 วิเคราะห์ประสิทธิภาพการทำนายแยกตามอารมณ์")
+        st.write("ตารางสรุปค่าสถิติเพื่อประเมินความแม่นยำและความถี่ของแต่ละอารมณ์")
+
+        summary_stats = df.groupby('Result').agg(
+            Count=('Result', 'count'),
+            Avg_Confidence=('Confidence', 'mean'),
+            Max_Confidence=('Confidence', 'max'),
+            Last_Seen=('Date', 'max')
+        ).reset_index()
+
+        summary_stats.columns = ['อารมณ์', 'จำนวนครั้งที่พบ (ครั้ง)', 'ความเชื่อมั่นเฉลี่ย (%)', 'ความเชื่อมั่นสูงสุด (%)', 'วันที่ตรวจพบล่าสุด']
+
+        styled_df = summary_stats.style.format({
+            'ความเชื่อมั่นเฉลี่ย (%)': '{:.2f}%',
+            'ความเชื่อมั่นสูงสุด (%)': '{:.2f}%'
+        }).background_gradient(subset=['ความเชื่อมั่นเฉลี่ย (%)'], cmap='YlGn'
+        ).background_gradient(subset=['จำนวนครั้งที่พบ (ครั้ง)'], cmap='Blues')
+
+        st.dataframe(styled_df, use_container_width=True)
+
+        # --- ส่วนที่ 3: Insight ---
+        best_emotion = summary_stats.loc[summary_stats['ความเชื่อมั่นเฉลี่ย (%)'].idxmax(), 'อารมณ์']
+        most_frequent = summary_stats.loc[summary_stats['จำนวนครั้งที่พบ (ครั้ง)'].idxmax(), 'อารมณ์']
+
+        st.info(f"""
+        **💡 Insight จากข้อมูล:**
+        * AI ของเราทำนายอารมณ์ **{best_emotion.upper()}** ได้มั่นใจที่สุด (แม่นยำที่สุด)
+        * อารมณ์ที่ระบบตรวจพบโต้ตอบบ่อยที่สุดคือ **{most_frequent.upper()}**
+        * ค่าเฉลี่ยความเชื่อมั่นโดยรวมของระบบคือ **{df['Confidence'].mean():.2f}%**
+        """)
         
-        # ส่วนท้าย: ปุ่มล้างข้อมูล
+        st.divider()
+
+        # --- ส่วนที่ 4: การจัดการข้อมูล (ไว้ท้ายสุด) ---
         st.write("#### ⚙️ การจัดการข้อมูล")
         if st.button("🗑️ ล้างข้อมูลประวัติทั้งหมด"):
             st.session_state.history = []
             st.success("ล้างข้อมูลเรียบร้อยแล้ว แอปกำลังเริ่มใหม่...")
-            st.rerun() # สั่งรันแอปใหม่ทันทีเพื่อให้หน้าจออัปเดต
+            st.rerun()
         
     else:
         st.info("กรุณาบันทึกข้อมูลที่แท็บ Home ก่อน เพื่อดู Dashboard ค่ะ")
