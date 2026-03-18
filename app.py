@@ -4,68 +4,139 @@ import cv2
 from PIL import Image
 import tflite_runtime.interpreter as tflite
 import os
+import pandas as pd
+from datetime import datetime
+
+# --- การตั้งค่าพื้นฐาน ---
+st.set_page_config(page_title="Emotion AI Detector", layout="wide")
+
+# สร้างที่เก็บข้อมูลใน Session (ถ้ายังไม่มี)
+if 'history' not in st.session_state:
+    st.session_state.history = []
 
 @st.cache_resource
 def load_tflite_model():
     model_path = os.path.join(os.getcwd(), "final_emotion_model.tflite")
-    # เพิ่มคำสั่งเช็กว่าไฟล์มีอยู่จริงไหม ถ้าไม่มีให้แจ้งเตือน
     if not os.path.exists(model_path):
-        st.error(f"❌ ไม่พบไฟล์โมเดล: {model_path} ใน Repository ค่ะ")
         return None
-        
     interpreter = tflite.Interpreter(model_path=model_path)
     interpreter.allocate_tensors()
     return interpreter
 
 interpreter = load_tflite_model()
+if interpreter is None:
+    st.error("❌ ไม่พบไฟล์โมเดล กรุณาเช็กใน Repository ค่ะ")
+    st.stop()
 
-if interpreter is not None:
-    input_details = interpreter.get_input_details()
-    output_details = interpreter.get_output_details()
-else:
-    st.stop() # หยุดการทำงานของแอปไว้ตรงนี้ถ้าโหลดโมเดลไม่ได้
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
 class_names = ['angry', 'happy', 'neutral', 'sad']
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-# --- หน้าเว็บ ---
-st.title("😊 Emotion AI Detector")
-st.write("อัปโหลดรูปภาพใบหน้าเพื่อให้ AI ช่วยวิเคราะห์อารมณ์")
+# --- ส่วนของ Tabs ---
+tab1, tab2, tab3 = st.tabs(["🏠 Home (Predict)", "📜 History", "📊 Dashboard"])
 
-uploaded_file = st.file_uploader("เลือกรูปภาพ...", type=["jpg", "jpeg", "png"])
-
-if uploaded_file is not None:
-    image = Image.open(uploaded_file)
-    st.image(image, caption='รูปภาพของคุณ', use_container_width=True)
+# --- TAB 1: หน้าหลักสำหรับการทำนาย ---
+with tab1:
+    st.title("😊 Emotion AI Detector")
+    st.write("อัปโหลดรูปภาพใบหน้าเพื่อให้ AI ช่วยวิเคราะห์อารมณ์")
     
-    img_array = np.array(image.convert('RGB'))
-    gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
-    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+    uploaded_file = st.file_uploader("เลือกรูปภาพ...", type=["jpg", "jpeg", "png"], key="uploader")
 
-    if len(faces) > 0:
-        (x, y, w, h) = faces[0]
-        roi = img_array[max(0, y - int(h*0.2)):y+h, x:x+w]
-        roi_resized = cv2.resize(roi, (224, 224))
+    if uploaded_file is not None:
+        image = Image.open(uploaded_file)
+        col1, col2 = st.columns([1, 1])
         
-        # เตรียม Input (0-255) สำหรับ EfficientNet
-        input_data = np.expand_dims(roi_resized, axis=0).astype(np.float32)
+        with col1:
+            st.image(image, caption='รูปภาพของคุณ', use_container_width=True)
         
-        # ทำนายผล
-        interpreter.set_tensor(input_details[0]['index'], input_data)
-        interpreter.invoke()
-        preds = interpreter.get_tensor(output_details[0]['index'])[0]
+        img_array = np.array(image.convert('RGB'))
+        gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+        faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+
+        if len(faces) > 0:
+            (x, y, w, h) = faces[0]
+            roi = img_array[max(0, y - int(h*0.2)):y+h, x:x+w]
+            roi_resized = cv2.resize(roi, (224, 224))
+            input_data = np.expand_dims(roi_resized, axis=0).astype(np.float32)
+            
+            # ทำนาย
+            interpreter.set_tensor(input_details[0]['index'], input_data)
+            interpreter.invoke()
+            preds = interpreter.get_tensor(output_details[0]['index'])[0]
+            
+            result = class_names[np.argmax(preds)]
+            confidence = np.max(preds)
+            
+            with col2:
+                st.subheader(f"🎯 ผลลัพธ์: {result.upper()}")
+                st.write(f"✨ ความมั่นใจ: {confidence * 100:.2f}%")
+                
+                # ปุ่มบันทึกข้อมูล
+                if st.button("📥 บันทึกผลการทำนาย"):
+                    data_entry = {
+                        "Time": datetime.now().strftime("%H:%M:%S"),
+                        "Date": datetime.now().strftime("%Y-%m-%d"),
+                        "Result": result,
+                        "Confidence": round(float(confidence) * 100, 2),
+                        "Image": image # เก็บรูปไว้แสดงในตาราง
+                    }
+                    st.session_state.history.append(data_entry)
+                    st.success("บันทึกข้อมูลเรียบร้อยแล้ว! ไปดูที่แท็บ History ได้เลย")
+
+# --- TAB 2: หน้าประวัติและการ Export ---
+with tab2:
+    st.header("📜 ประวัติการทำนาย")
+    if len(st.session_state.history) > 0:
+        df = pd.DataFrame(st.session_state.history)
         
-        result = class_names[np.argmax(preds)]
-        confidence = np.max(preds)
+        # แสดงตาราง (ไม่โชว์คอลัมน์รูปในตารางมาตรฐานเพื่อความสะอาด)
+        st.dataframe(df.drop(columns=['Image']), use_container_width=True)
         
-        # แสดงผล
+        # ปุ่มดาวน์โหลด CSV
+        csv = df.drop(columns=['Image']).to_csv(index=False).encode('utf-8-sig')
+        st.download_button(
+            label="📥 Export as CSV",
+            data=csv,
+            file_name=f'emotion_results_{datetime.now().strftime("%Y%m%d")}.csv',
+            mime='text/csv',
+        )
+        
         st.divider()
-        emoji_map = {"angry": "😡", "happy": "😄", "neutral": "😐", "sad": "😢"}
-        st.subheader(f"🎯 ผลลัพธ์: {result.upper()} {emoji_map.get(result, '')}")
-        st.progress(float(confidence))
-        st.write(f"✨ ความมั่นใจ: {confidence * 100:.2f}%")
-        
-        with st.expander("ดูผลวิเคราะห์แบบละเอียด"):
-            for i, name in enumerate(class_names):
-                st.write(f"{name}: {preds[i]*100:.2f}%")
+        st.subheader("🖼️ รูปภาพที่บันทึกไว้")
+        # แสดงรูปวนลูป
+        cols = st.columns(4)
+        for idx, item in enumerate(st.session_state.history):
+            with cols[idx % 4]:
+                st.image(item['Image'], caption=f"{item['Result']} ({item['Confidence']}%)", use_container_width=True)
     else:
-        st.error("❌ ไม่พบใบหน้าในภาพ กรุณาใช้รูปที่เห็นใบหน้าชัดเจนค่ะ")
+        st.info("ยังไม่มีข้อมูลถูกบันทึก")
+
+# --- TAB 3: Dashboard วิเคราะห์ข้อมูล ---
+with tab3:
+    st.header("📊 Deep Dashboard")
+    if len(st.session_state.history) > 0:
+        df = pd.DataFrame(st.session_state.history)
+        
+        # แถวที่ 1: Metric สรุป
+        m1, m2, m3 = st.columns(3)
+        m1.metric("Total Scans", len(df))
+        m2.metric("Most Common", df['Result'].mode()[0].upper())
+        m3.metric("Avg. Confidence", f"{df['Confidence'].mean():.2f}%")
+        
+        col_chart1, col_chart2 = st.columns(2)
+        
+        with col_chart1:
+            st.write("### 🍰 สัดส่วนอารมณ์ที่พบ (Pie Chart)")
+            pie_data = df['Result'].value_counts()
+            st.pie_chart(pie_data)
+            
+        with col_chart2:
+            st.write("### 📈 ความมั่นใจในแต่ละครั้ง (Line Chart)")
+            st.line_chart(df['Confidence'])
+
+        st.write("### 📊 จำนวนครั้งที่พบแต่ละอารมณ์ (Bar Chart)")
+        st.bar_chart(df['Result'].value_counts())
+        
+    else:
+        st.info("กรุณาบันทึกข้อมูลที่แท็บ Home ก่อนเพื่อดู Dashboard ค่ะ")
