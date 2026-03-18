@@ -54,30 +54,74 @@ with tab1:
     # 2. ส่วนแสดงรูปภาพตัวอย่างอารมณ์แบบมีมิติ
     st.write("### 📸 ตัวอย่างการวิเคราะห์อารมณ์")
     
-  # 1. ปรับ CSS ในส่วน st.markdown ด้านบน
-    st.markdown("""
+ st.markdown("""
         <style>
+        /* 1. ตกแต่งกรอบ Card ให้มีลูกเล่น Gradient */
         .emotion-card {
-            background: white;
-            padding: 15px;
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            border: 3px solid #eee;
-            transition: transform 0.3s ease;
+            background: #ffffff;
+            padding: 10px;
+            border-radius: 20px;
+            /* เพิ่มเงาแบบฟุ้งๆ ดูมีมิติ */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-align: center;
-            margin-bottom: 20px;
-            height: 320px; /* กำหนดความสูงของกรอบให้เท่ากันทั้งหมด */
+            margin-bottom: 25px;
+            height: 330px;
+            position: relative;
+            overflow: hidden;
         }
+
+        /* 2. เอฟเฟกต์เมื่อเอาเมาส์ไปวาง (Hover) */
+        .emotion-card:hover {
+            transform: translateY(-12px); /* ลอยสูงขึ้น */
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            border: 1px solid #FFD700; /* เปลี่ยนสีขอบเมื่อชี้ */
+        }
+
+        /* 3. จัดการรูปภาพให้สวยงามและมี Zoom Effect */
+        .emotion-card .img-container {
+            width: 100%;
+            height: 220px;
+            overflow: hidden; /* บังส่วนที่ล้นตอน Zoom */
+            border-radius: 15px;
+        }
+
         .emotion-card img {
-            border-radius: 10px;
-            width: 100%;       /* บังคับความกว้าง */
-            height: 200px;     /* บังคับความสูงของตัวรูปภาพ (ปรับเลขนี้ได้ตามชอบ) */
-            object-fit: cover; /* สำคัญมาก! ทำให้รูปไม่ยืด แต่จะครอปส่วนที่เกินแทน */
-            object-position: center; /* ให้เน้นจุดกึ่งกลางของภาพ */
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            transition: transform 0.6s ease; /* หน่วงเวลาตอนขยายรูป */
+        }
+
+        .emotion-card:hover img {
+            transform: scale(1.15); /* รูปขยายขึ้นเมื่อเอาเมาส์ชี้ */
+        }
+
+        /* 4. ตกแต่งตัวหนังสือ (Emotion Name) */
+        .emotion-card h4 {
+            margin-top: 15px;
+            font-family: 'Kanit', sans-serif;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        
+        /* 5. เพิ่มแถบสีเล็กๆ ด้านล่างให้ดูมีดีไซน์ */
+        .emotion-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #eee, transparent);
+            border-radius: 2px;
         }
         </style>
     """, unsafe_allow_html=True)
-
     # กำหนดที่อยู่ของไฟล์รูปภาพ (หนูเช็คชื่อไฟล์ตรงนี้ให้ตรงกับในเครื่องนะคะ)
     img_paths = {
         "happy": "happy.jpg",
