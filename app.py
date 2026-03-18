@@ -7,7 +7,7 @@ import os
 
 @st.cache_resource
 def load_tflite_model():
-    model_path = "final_emotion_model.tflite"
+    model_path = os.path.join(os.getcwd(), "final_emotion_model.tflite")
     # เพิ่มคำสั่งเช็กว่าไฟล์มีอยู่จริงไหม ถ้าไม่มีให้แจ้งเตือน
     if not os.path.exists(model_path):
         st.error(f"❌ ไม่พบไฟล์โมเดล: {model_path} ใน Repository ค่ะ")
