@@ -157,7 +157,7 @@ with tab1:
         "happy": "happy.jpg",
         "neutral": "17bcdc21a9708217b8e7b475f13de0e3.jpg",
         "sad": "sad.jpg",
-        "angry": "angryั.jpg"
+        "angry": "angryy.jpg"
     }
     # แสดงผลรูปภาพตัวอย่างใน 4 คอลัมน์
     col_emo1, col_emo2, col_emo3, col_emo4 = st.columns(4, gap="large")
