@@ -6,6 +6,7 @@ import tflite_runtime.interpreter as tflite
 import os
 import pandas as pd
 from datetime import datetime
+import plotly.express as px
 
 # --- การตั้งค่าพื้นฐาน ---
 st.set_page_config(page_title="Emotion AI Detector", layout="wide")
@@ -32,6 +33,9 @@ input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 class_names = ['angry', 'happy', 'neutral', 'sad']
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+
+# กำหนดสีมาตรฐานสำหรับแต่ละอารมณ์เพื่อให้กราฟดูง่าย
+color_map = {"angry": "#FF4B4B", "happy": "#FACA2E", "neutral": "#00CC96", "sad": "#636EFA"}
 
 # --- ส่วนของ Tabs ---
 tab1, tab2, tab3 = st.tabs(["🏠 Home (Predict)", "📜 History", "📊 Dashboard"])
@@ -118,25 +122,52 @@ with tab3:
     if len(st.session_state.history) > 0:
         df = pd.DataFrame(st.session_state.history)
         
+        # เตรียมข้อมูลสำหรับกราฟ Pie และ Bar (นับจำนวนอารมณ์)
+        pie_df = df['Result'].value_counts().reset_index()
+        pie_df.columns = ['Emotion', 'Count']
+
         # แถวที่ 1: Metric สรุป
         m1, m2, m3 = st.columns(3)
         m1.metric("Total Scans", len(df))
-        m2.metric("Most Common", df['Result'].mode()[0].upper())
+        # หาอารมณ์ที่พบบ่อยที่สุด (ถ้ามีหลายอันเท่ากันจะเลือกอันแรก)
+        most_common = df['Result'].mode()[0]
+        m2.metric("Most Common", most_common.upper())
         m3.metric("Avg. Confidence", f"{df['Confidence'].mean():.2f}%")
         
+        st.divider()
+
+        # แถวที่ 2: กราฟ Pie และ Line
         col_chart1, col_chart2 = st.columns(2)
         
         with col_chart1:
             st.write("### 🍰 สัดส่วนอารมณ์ที่พบ (Pie Chart)")
-            pie_data = df['Result'].value_counts()
-            st.pie_chart(pie_data)
+            # ใช้ Plotly สร้างกราฟวงกลม
+            fig = px.pie(pie_df, values='Count', names='Emotion', 
+                         color='Emotion',
+                         color_discrete_map=color_map)
+            st.plotly_chart(fig, use_container_width=True)
             
         with col_chart2:
             st.write("### 📈 ความมั่นใจในแต่ละครั้ง (Line Chart)")
             st.line_chart(df['Confidence'])
 
+        st.divider()
+
+        # แถวที่ 3: กราฟแท่งแบบ Plotly (แยกสีสวยงาม)
         st.write("### 📊 จำนวนครั้งที่พบแต่ละอารมณ์ (Bar Chart)")
-        st.bar_chart(df['Result'].value_counts())
+        fig2 = px.bar(pie_df, x='Emotion', y='Count', color='Emotion',
+                      color_discrete_map=color_map, text='Count')
+        fig2.update_traces(textposition='outside') # โชว์ตัวเลขบนแท่ง
+        st.plotly_chart(fig2, use_container_width=True)
+        
+        st.divider()
+        
+        # ส่วนท้าย: ปุ่มล้างข้อมูล
+        st.write("#### ⚙️ การจัดการข้อมูล")
+        if st.button("🗑️ ล้างข้อมูลประวัติทั้งหมด"):
+            st.session_state.history = []
+            st.success("ล้างข้อมูลเรียบร้อยแล้ว แอปกำลังเริ่มใหม่...")
+            st.rerun() # สั่งรันแอปใหม่ทันทีเพื่อให้หน้าจออัปเดต
         
     else:
-        st.info("กรุณาบันทึกข้อมูลที่แท็บ Home ก่อนเพื่อดู Dashboard ค่ะ")
+        st.info("กรุณาบันทึกข้อมูลที่แท็บ Home ก่อน เพื่อดู Dashboard ค่ะ")
