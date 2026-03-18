@@ -44,13 +44,46 @@ tab1, tab2, tab3 = st.tabs(["🏠 Home (Predict)", "📜 History", "📊 Dashboa
 # --- TAB 1: หน้าหลักสำหรับการทำนาย ---
 with tab1:
     # 1. ส่วน Header ของหน้า (Hero Section)
+    # 1. ส่วน Header ของหน้า (Hero Section) - ปรับปรุงใหม่ให้ดู Professional
     st.markdown("""
-        <div style="background-color: #f0f2f6; padding: 30px; border-radius: 20px; margin-bottom: 30px; box-shadow: 0 4px 8px rgba(0,0,0,0.05);">
-            <h1 style="text-align: center; color: #0E1117; font-size: 3em;">😊 Emotion AI Detector</h1>
-            <p style="text-align: center; color: #555; font-size: 1.2em;">ปลดล็อกความรู้สึกผ่านใบหน้าด้วยระบบวิเคราะห์อัจฉริยะ</p>
+        <div style="
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            padding: 40px;
+            border-radius: 25px;
+            margin-bottom: 35px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.05);
+            text-align: center;
+        ">
+            <h1 style="
+                color: #1E1E1E;
+                font-family: 'Kanit', sans-serif;
+                font-weight: 800;
+                font-size: 3.2em;
+                margin-bottom: 10px;
+            ">😊 Emotion AI Detector</h1>
+            <div style="
+                width: 100px;
+                height: 5px;
+                background: linear-gradient(90deg, #FF4B4B, #FACA2E, #00CC96, #636EFA);
+                margin: 20px auto;
+                border-radius: 5px;
+            "></div>
+            <p style="
+                color: #4A4A4A;
+                font-family: 'Kanit', sans-serif;
+                font-size: 1.3em;
+                line-height: 1.6;
+                max-width: 800px;
+                margin: 0 auto;
+            ">
+                <b>ระบบวิเคราะห์สภาวะอารมณ์ผ่านคุณลักษณะบนใบหน้าด้วยเทคโนโลยีปัญญาประดิษฐ์</b><br>
+                <span style="font-size: 0.9em; color: #777;">
+                    (Human Facial Emotion Recognition System using Deep Learning Architecture)
+                </span>
+            </p>
         </div>
     """, unsafe_allow_html=True)
-
     # 2. ส่วนแสดงรูปภาพตัวอย่างอารมณ์แบบมีมิติ
     st.write("ตัวอย่างการวิเคราะห์อารมณ์")
     
