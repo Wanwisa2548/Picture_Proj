@@ -84,12 +84,13 @@ with tab1:
         </div>
     """, unsafe_allow_html=True)
 
-    # 2. ส่วนแสดงรูปภาพตัวอย่างอารมณ์แบบมีมิติ พร้อม CSS ลูกเล่น
-    st.write("### 📸 ตัวอย่างการวิเคราะห์อารมณ์")
+    # 2. ส่วนแสดงรูปภาพตัวอย่างอารมณ์และสไตล์ทั้งหมด
+    st.write("### ตัวอย่างการวิเคราะห์อารมณ์")
     
+    # รวม CSS ทั้งหมดไว้ใน Markdown เดียว เพื่อป้องกันการซ้อนทับของ UI
     st.markdown("""
         <style>
-        /* 1. ตกแต่งกรอบ Card และรูปภาพ */
+        /* --- 1. สไตล์สำหรับ Card รูปภาพตัวอย่าง --- */
         .emotion-card {
             background: #ffffff;
             padding: 10px;
@@ -119,22 +120,15 @@ with tab1:
             transform: scale(1.1);
         }
 
-        # --- ส่วนที่ 3: อัปโหลดแบบมินิมอล (ลบจรวด + ซ่อนรายละเอียดไฟล์) ---
-    
-    # 1. แทรก CSS เพิ่มเติมเพื่อซ่อนข้อความ Drag & Drop และรายละเอียดไฟล์
+        /* --- 2. สไตล์สำหรับ Uploader แบบมินิมอล (ซ่อนส่วนเกิน) --- */
         /* ซ่อนข้อความ 'Drag and drop file here' และ 'Limit 200MB...' */
-        [data-testid="stFileUploaderSmallBar"] {
-            display: none;
-        }
-        [data-testid="stFileUploader"] section div {
-            display: none;
-        }
-        /* ซ่อนไอคอน Cloud อัปโหลดอันเดิม */
+        [data-testid="stFileUploaderSmallBar"], 
+        [data-testid="stFileUploader"] section div,
         [data-testid="stFileUploader"] section svg {
-            display: none;
+            display: none !important;
         }
         
-        /* ปรับแต่งปุ่ม Browse Files ให้เด่นขึ้นและอยู่ตรงกลาง (ถ้าต้องการ) */
+        /* ปรับแต่งปุ่ม Browse Files ให้เด่นและอยู่กลาง */
         button[kind="secondary"] {
             background: linear-gradient(135deg, #636EFA 0%, #a663fa 100%) !important;
             color: white !important;
@@ -146,22 +140,26 @@ with tab1:
             box-shadow: 0 4px 15px rgba(99, 110, 250, 0.4) !important;
             transition: all 0.3s ease !important;
             display: block !important;
-            margin: 0 auto !important; /* จัดปุ่มให้อยู่กึ่งกลาง */
+            margin: 0 auto !important;
         }
 
         button[kind="secondary"]:hover {
             box-shadow: 0 0 25px rgba(166, 99, 250, 0.7) !important;
-            transform: scale(1.1) !important;
+            transform: scale(1.05) !important;
         }
         
-        /* ปรับกรอบให้เล็กลงและดูสะอาดตา */
+        /* ปรับกรอบ Uploader */
         [data-testid="stFileUploader"] {
             border: 2px dashed #e0e0e0;
             background-color: transparent;
-            padding: 10px;
+            padding: 15px;
+            border-radius: 20px;
         }
         </style>
     """, unsafe_allow_html=True)
+
+    # ตรวจสอบให้แน่ใจว่าเรียกบรรทัดนี้แค่ที่เดียวใน tab1
+    uploaded_file = st.file_uploader("uploader", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
     # 2. ส่วนแสดงผลข้อความหัวข้อ
     st.markdown("<h3 style='text-align: center; color: #1E1E1E; margin-bottom: 20px;'>📤 เพิ่มไฟล์ใบหน้าของคุณ</h3>", unsafe_allow_html=True)
