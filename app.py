@@ -81,10 +81,10 @@ with tab1:
 
     # กำหนดที่อยู่ของไฟล์รูปภาพ (หนูเช็คชื่อไฟล์ตรงนี้ให้ตรงกับในเครื่องนะคะ)
     img_paths = {
-        "happy": "Screenshot 2026-03-19 005239",
-        "neutral": "Screenshot 2026-03-19 005301",
-        "sad": "Screenshot 2026-03-19 005322",
-        "angry": "Screenshot 2026-03-19 005351"
+        "happy": "Screenshot 2026-03-19 005239.jpg",
+        "neutral": "Screenshot 2026-03-19 005301.jpg",
+        "sad": "Screenshot 2026-03-19 005322.jpg",
+        "angry": "Screenshot 2026-03-19 005351.jpg"
     }
 
     # แสดงผลรูปภาพตัวอย่างใน 4 คอลัมน์
